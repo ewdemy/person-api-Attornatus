@@ -8,3 +8,16 @@ insert into ENDERECO(logradouro, cep, numero, cidade, principal) values ('Rua Se
 insert into ENDERECO(logradouro, cep, numero, cidade, principal) values ('Travessa Antônio Ferreira', '68700216', '568', 'Capanema', false);
 insert into ENDERECO(logradouro, cep, numero, cidade, principal) values ('Rua dos Carijós', '30120060', '130', 'Belo Horizonte', false);
 insert into ENDERECO(logradouro, cep, numero, cidade, principal) values ('Rodovia Raposo Tavares', '06709015', '95', 'Cotia', false);
+
+INSERT INTO PESSOA (nome,data_nascimento)
+VALUES
+  ('Elmo Spence','2002-12-4'),
+  ('Donna Ware','1962-11-28'),
+  ('Venus Kirkland','1977-1-1'),
+  ('Geoffrey Cline','1990-12-7'),
+  ('Hayes Duncan','1993-3-30'),
+  ('Ila Horton','1978-2-26'),
+  ('Carl Stone','1978-9-8'),
+  ('Quamar Bolton','2003-9-25'),
+  ('Gregory Mayer','1982-11-15'),
+  ('Hedley Dalton','1956-10-14');
