@@ -23,7 +23,7 @@ public class EnderecoServiceImpl implements EnderecoService {
     @Override
     public Endereco buscar(Long id) {
         return enderecoRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado!"));
+                .orElseThrow(() -> new EntityNotFoundException("Endereço não encontrado com ID: " + id));
     }
 
     @Override
