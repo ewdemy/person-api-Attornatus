@@ -42,4 +42,9 @@ public class PessoaController {
     public void deletar(@PathVariable Long id){
         pessoaService.deletar(id);
     }
+
+    @PutMapping("/{idPessoa}/{idEndereco}")
+    public Pessoa adicionarEndereco(@PathVariable Long idPessoa, @PathVariable Long idEndereco){
+        return pessoaService.adicionarEndereco(idPessoa, idEndereco);
+    }
 }

@@ -1,7 +1,9 @@
 package com.mrcruz.personapi.service.impl;
 
+import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.repository.PessoaRepository;
+import com.mrcruz.personapi.service.EnderecoService;
 import com.mrcruz.personapi.service.PessoaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class PessoaServiceImpl implements PessoaService {
 
     private PessoaRepository pessoaRepository;
+    private EnderecoService enderecoService;
     @Override
     public Pessoa salvar(Pessoa pessoa) {
         return pessoaRepository.save(pessoa);
@@ -44,5 +47,13 @@ public class PessoaServiceImpl implements PessoaService {
     public void deletar(Long id) {
         var pessoaBanco = buscar(id);
         pessoaRepository.delete(pessoaBanco);
+    }
+
+    @Override
+    public Pessoa adicionarEndereco(Long idPessoa, Long idEndereco) {
+        Pessoa pessoa = buscar(idEndereco);
+        Endereco endereco = enderecoService.buscar(idEndereco);
+        pessoa.getEnderecos().add(endereco);
+        return pessoaRepository.save(pessoa);
     }
 }
