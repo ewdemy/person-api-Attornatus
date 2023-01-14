@@ -26,7 +26,10 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public Page<Pessoa> listar(Pageable pageable) {
+    public Page<Pessoa> listar(String nome, Pageable pageable) {
+        if(nome != null && !nome.isBlank())
+            return pessoaRepository.findByNomeContainingIgnoreCase(nome, pageable);
+
         return pessoaRepository.findAll(pageable);
     }
 

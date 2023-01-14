@@ -23,8 +23,8 @@ public class PessoaController {
     }
 
     @GetMapping
-    public Page<Pessoa> listar(Pageable pageable){
-        return pessoaService.listar(pageable);
+    public Page<Pessoa> listar(@RequestParam(required = false) String nome, Pageable pageable){
+        return pessoaService.listar(nome, pageable);
     }
 
     @GetMapping("/{id}")

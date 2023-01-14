@@ -10,7 +10,7 @@ public interface PessoaService {
 
     Pessoa buscar(Long id);
 
-    Page<Pessoa> listar (Pageable pageable);
+    Page<Pessoa> listar (String nome, Pageable pageable);
 
     Pessoa atualizar(Long id, Pessoa pessoa);
 
