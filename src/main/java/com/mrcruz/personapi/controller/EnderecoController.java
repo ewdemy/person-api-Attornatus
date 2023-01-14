@@ -2,6 +2,7 @@ package com.mrcruz.personapi.controller;
 
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.service.EnderecoService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public class EnderecoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Endereco salvar(@RequestBody Endereco endereco){
+    public Endereco salvar(@RequestBody @Valid Endereco endereco){
         return enderecoService.salvar(endereco);
     }
 
@@ -32,7 +33,7 @@ public class EnderecoController {
     }
 
     @PutMapping("{id}")
-    public Endereco atualizar(@PathVariable Long id, @RequestBody Endereco endereco){
+    public Endereco atualizar(@PathVariable Long id, @RequestBody @Valid Endereco endereco){
         return enderecoService.atualizar(id, endereco);
     }
 

@@ -2,6 +2,7 @@ package com.mrcruz.personapi.controller;
 
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.service.PessoaService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,7 @@ public class PessoaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Pessoa salvar(@RequestBody Pessoa pessoa){
+    public Pessoa salvar(@RequestBody @Valid Pessoa pessoa){
         return pessoaService.salvar(pessoa);
     }
 
@@ -32,7 +33,7 @@ public class PessoaController {
     }
 
     @PutMapping("/{id}")
-    public Pessoa atualizar(@PathVariable Long id, @RequestBody Pessoa pessoa){
+    public Pessoa atualizar(@PathVariable Long id, @RequestBody @Valid Pessoa pessoa){
         return pessoaService.atualizar(id, pessoa);
     }
 
