@@ -34,7 +34,7 @@ public class Pessoa {
     @ManyToOne
     private Endereco enderecoPrincipal;
 
-    @ManyToMany(cascade ={CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
+    @ManyToMany(cascade ={CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(name="PESSOA_ENDERECO",
             joinColumns={@JoinColumn(name="PESSOA_ID")},
             inverseJoinColumns={@JoinColumn(name="ENDERECO_ID")})

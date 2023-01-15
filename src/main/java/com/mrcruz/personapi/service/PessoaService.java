@@ -1,6 +1,7 @@
 package com.mrcruz.personapi.service;
 
 import com.mrcruz.personapi.model.Pessoa;
+import com.mrcruz.personapi.model.PessoaDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +11,7 @@ public interface PessoaService {
 
     Pessoa buscar(Long id);
 
-    Page<Pessoa> listar (String nome, Pageable pageable);
+    Page<PessoaDTO> listar (String nome, Pageable pageable);
 
     Pessoa atualizar(Long id, Pessoa pessoa);
 

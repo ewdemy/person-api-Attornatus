@@ -1,6 +1,7 @@
 package com.mrcruz.personapi.controller;
 
 import com.mrcruz.personapi.model.Pessoa;
+import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.service.PessoaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ public class PessoaController {
     }
 
     @GetMapping
-    public Page<Pessoa> listar(@RequestParam(required = false) String nome, Pageable pageable){
+    public Page<PessoaDTO> listar(@RequestParam(required = false) String nome, Pageable pageable){
         return pessoaService.listar(nome, pageable);
     }
 

@@ -2,10 +2,12 @@ package com.mrcruz.personapi.service.impl;
 
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
+import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.repository.PessoaRepository;
 import com.mrcruz.personapi.service.EnderecoService;
 import com.mrcruz.personapi.service.PessoaService;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,12 +30,15 @@ public class PessoaServiceImpl implements PessoaService {
                 .orElseThrow(() -> new EntityNotFoundException("Pessoa não encontrada com ID: " + id));
     }
 
+    @Transactional
     @Override
-    public Page<Pessoa> listar(String nome, Pageable pageable) {
-        if(nome != null && !nome.isBlank())
-            return pessoaRepository.findByNomeContainingIgnoreCase(nome, pageable);
+    public Page<PessoaDTO> listar(String nome, Pageable pageable) {
+        if(nome != null && !nome.isBlank()) {
+            return pessoaRepository
+                    .findByNomeContainingIgnoreCase(nome, pageable).map(this::toPessoaDTO);
+        }
 
-        return pessoaRepository.findAll(pageable);
+        return pessoaRepository.findAll(pageable).map(this::toPessoaDTO);
     }
 
     @Override
@@ -71,5 +76,13 @@ public class PessoaServiceImpl implements PessoaService {
         pessoa.setEnderecoPrincipal(endereco);
 
         return pessoaRepository.save(pessoa);
+    }
+
+    private PessoaDTO toPessoaDTO(Pessoa pessoa){
+        return new PessoaDTO(
+                pessoa.getId(),
+                pessoa.getNome(),
+                pessoa.getDataNascimento(),
+                pessoa.getEnderecoPrincipal());
     }
 }
