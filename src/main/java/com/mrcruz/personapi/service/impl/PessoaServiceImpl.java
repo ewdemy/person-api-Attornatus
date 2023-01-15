@@ -69,11 +69,20 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
+    public Pessoa removerEndereco(Long idPessoa, Long idEndereco) {
+        Pessoa pessoa = buscar(idPessoa);
+        Endereco endereco = enderecoService.buscar(idEndereco);
+        existeEnderecoPessoa(pessoa, endereco);
+
+        pessoa.getEnderecos().remove(endereco);
+        return pessoaRepository.save(pessoa);
+    }
+
+    @Override
     public Pessoa adicionarEnderecoPrincipal(Long idPessoa, Long idEndereco) {
         Pessoa pessoa = buscar(idPessoa);
         Endereco endereco = enderecoService.buscar(idEndereco);
-        if(pessoa.getEnderecos().isEmpty() || !pessoa.getEnderecos().contains(endereco))
-            throw new UnsupportedOperationException("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco);
+        existeEnderecoPessoa(pessoa, endereco);
 
         pessoa.setEnderecoPrincipal(endereco);
 
@@ -92,5 +101,10 @@ public class PessoaServiceImpl implements PessoaService {
                 pessoa.getNome(),
                 pessoa.getDataNascimento(),
                 pessoa.getEnderecoPrincipal());
+    }
+
+    private void existeEnderecoPessoa(Pessoa pessoa, Endereco endereco){
+        if(pessoa.getEnderecos().isEmpty() || !pessoa.getEnderecos().contains(endereco))
+            throw new UnsupportedOperationException("Pessoa com ID: " + pessoa.getId() + " não possui endereço com ID: " + endereco.getId());
     }
 }

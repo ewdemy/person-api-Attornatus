@@ -57,6 +57,11 @@ public class PessoaController {
         return pessoaService.adicionarEnderecoPrincipal(idPessoa, idEndereco);
     }
 
+    @PutMapping("/{idPessoa}/remover-endereco/{idEndereco}")
+    public Pessoa removerEndereco(@PathVariable Long idPessoa, @PathVariable Long idEndereco){
+        return pessoaService.removerEndereco(idPessoa, idEndereco);
+    }
+
     @GetMapping("/{idPessoa}/enderecos")
     public Set<Endereco> buscarEnderecosPessoa(@PathVariable Long idPessoa){
         return pessoaService.buscarEnderecosPessoa(idPessoa);
