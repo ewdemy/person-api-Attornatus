@@ -17,4 +17,5 @@ public interface PessoaService {
     void deletar(Long id);
 
     Pessoa adicionarEndereco(Long idPessoa, Long idEndereco);
+    Pessoa adicionarEnderecoPrincipal(Long idPessoa, Long idEndereco);
 }

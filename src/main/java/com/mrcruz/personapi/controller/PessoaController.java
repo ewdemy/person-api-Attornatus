@@ -43,8 +43,13 @@ public class PessoaController {
         pessoaService.deletar(id);
     }
 
-    @PutMapping("/{idPessoa}/{idEndereco}")
+    @PutMapping("/{idPessoa}/adicionar-endereco/{idEndereco}")
     public Pessoa adicionarEndereco(@PathVariable Long idPessoa, @PathVariable Long idEndereco){
         return pessoaService.adicionarEndereco(idPessoa, idEndereco);
+    }
+
+    @PutMapping("/{idPessoa}/adicionar-endereco-principal/{idEndereco}")
+    public Pessoa adicionarEnderecoPrincipal(@PathVariable Long idPessoa, @PathVariable Long idEndereco){
+        return pessoaService.adicionarEnderecoPrincipal(idPessoa, idEndereco);
     }
 }

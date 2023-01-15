@@ -29,6 +29,12 @@ public class ApiExceptionHandler{
         return getResponse(req, "Endereço atribuido a uma pessoa, não é possível excluir!", HttpStatus.NOT_ACCEPTABLE);
     }
 
+    @ExceptionHandler(UnsupportedOperationException.class)
+    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    public ErrroResponse handleUnsupportedOperationException(UnsupportedOperationException ex, HttpServletRequest req){
+        return getResponse(req, ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrroResponse handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest req){

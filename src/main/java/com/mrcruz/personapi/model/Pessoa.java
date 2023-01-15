@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -38,6 +38,6 @@ public class Pessoa {
     @JoinTable(name="PESSOA_ENDERECO",
             joinColumns={@JoinColumn(name="PESSOA_ID")},
             inverseJoinColumns={@JoinColumn(name="ENDERECO_ID")})
-    private List<Endereco> enderecos = new ArrayList<>();
+    private Set<Endereco> enderecos = new HashSet<>();
 
 }

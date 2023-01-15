@@ -51,9 +51,25 @@ public class PessoaServiceImpl implements PessoaService {
 
     @Override
     public Pessoa adicionarEndereco(Long idPessoa, Long idEndereco) {
-        Pessoa pessoa = buscar(idEndereco);
+        Pessoa pessoa = buscar(idPessoa);
         Endereco endereco = enderecoService.buscar(idEndereco);
         pessoa.getEnderecos().add(endereco);
+
+        if(pessoa.getEnderecoPrincipal() == null)
+            pessoa.setEnderecoPrincipal(endereco);
+
+        return pessoaRepository.save(pessoa);
+    }
+
+    @Override
+    public Pessoa adicionarEnderecoPrincipal(Long idPessoa, Long idEndereco) {
+        Pessoa pessoa = buscar(idPessoa);
+        Endereco endereco = enderecoService.buscar(idEndereco);
+        if(pessoa.getEnderecos().isEmpty() || !pessoa.getEnderecos().contains(endereco))
+            throw new UnsupportedOperationException("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco);
+
+        pessoa.setEnderecoPrincipal(endereco);
+
         return pessoaRepository.save(pessoa);
     }
 }
