@@ -1,6 +1,7 @@
 package com.mrcruz.personapi.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Entity
 public class Pessoa {
 
@@ -29,7 +31,10 @@ public class Pessoa {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate dataNascimento;
 
-    @ManyToMany(cascade ={CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne
+    private Endereco enderecoPrincipal;
+
+    @ManyToMany(cascade ={CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinTable(name="PESSOA_ENDERECO",
             joinColumns={@JoinColumn(name="PESSOA_ID")},
             inverseJoinColumns={@JoinColumn(name="ENDERECO_ID")})

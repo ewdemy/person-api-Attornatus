@@ -28,7 +28,4 @@ public class Endereco {
     @NotBlank( message = "Deve ser preenchida")
     private String cidade;
 
-    @Column(columnDefinition = "BOOLEAN DEFAULT false")
-    private boolean principal = false;
-
 }
