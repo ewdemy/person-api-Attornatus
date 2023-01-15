@@ -1,5 +1,6 @@
 package com.mrcruz.personapi.controller;
 
+import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.service.PessoaService;
@@ -9,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @AllArgsConstructor
 @RestController
@@ -52,5 +55,10 @@ public class PessoaController {
     @PutMapping("/{idPessoa}/adicionar-endereco-principal/{idEndereco}")
     public Pessoa adicionarEnderecoPrincipal(@PathVariable Long idPessoa, @PathVariable Long idEndereco){
         return pessoaService.adicionarEnderecoPrincipal(idPessoa, idEndereco);
+    }
+
+    @GetMapping("/{idPessoa}/enderecos")
+    public Set<Endereco> buscarEnderecosPessoa(@PathVariable Long idPessoa){
+        return pessoaService.buscarEnderecosPessoa(idPessoa);
     }
 }

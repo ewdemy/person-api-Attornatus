@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @AllArgsConstructor
 @Service
 public class PessoaServiceImpl implements PessoaService {
@@ -76,6 +78,12 @@ public class PessoaServiceImpl implements PessoaService {
         pessoa.setEnderecoPrincipal(endereco);
 
         return pessoaRepository.save(pessoa);
+    }
+
+    @Override
+    public Set<Endereco> buscarEnderecosPessoa(Long idPessoa) {
+        Pessoa pessoa = buscar(idPessoa);
+        return pessoa.getEnderecos();
     }
 
     private PessoaDTO toPessoaDTO(Pessoa pessoa){
