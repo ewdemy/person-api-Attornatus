@@ -3,6 +3,7 @@ package com.mrcruz.personapi.service.impl;
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
+import com.mrcruz.personapi.model.PessoaRequest;
 import com.mrcruz.personapi.repository.PessoaRepository;
 import com.mrcruz.personapi.service.EnderecoService;
 import com.mrcruz.personapi.service.PessoaService;
@@ -22,8 +23,8 @@ public class PessoaServiceImpl implements PessoaService {
     private PessoaRepository pessoaRepository;
     private EnderecoService enderecoService;
     @Override
-    public Pessoa salvar(Pessoa pessoa) {
-        return pessoaRepository.save(pessoa);
+    public Pessoa salvar(PessoaRequest pessoa) {
+        return pessoaRepository.save(pessoa.toModel());
     }
 
     @Override
@@ -44,10 +45,11 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public Pessoa atualizar(Long id, Pessoa pessoa) {
+    public Pessoa atualizar(Long id, PessoaRequest pessoa) {
         var pessoaBanco = buscar(id);
-        pessoa.setId(pessoaBanco.getId());
-        return pessoaRepository.save(pessoa);
+        pessoaBanco.setNome(pessoa.getNome());
+        pessoaBanco.setDataNascimento(pessoa.getDataNascimento());
+        return pessoaRepository.save(pessoaBanco);
     }
 
     @Override

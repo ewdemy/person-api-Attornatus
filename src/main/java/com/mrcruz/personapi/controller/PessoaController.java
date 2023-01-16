@@ -3,6 +3,7 @@ package com.mrcruz.personapi.controller;
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
+import com.mrcruz.personapi.model.PessoaRequest;
 import com.mrcruz.personapi.service.PessoaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ public class PessoaController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Pessoa salvar(@RequestBody @Valid Pessoa pessoa){
+    public Pessoa salvar(@RequestBody @Valid PessoaRequest pessoa){
         return pessoaService.salvar(pessoa);
     }
 
@@ -38,7 +39,7 @@ public class PessoaController {
     }
 
     @PutMapping("/{id}")
-    public Pessoa atualizar(@PathVariable Long id, @RequestBody @Valid Pessoa pessoa){
+    public Pessoa atualizar(@PathVariable Long id, @RequestBody @Valid PessoaRequest pessoa){
         return pessoaService.atualizar(id, pessoa);
     }
 
