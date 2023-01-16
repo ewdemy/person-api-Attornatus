@@ -4,6 +4,7 @@ import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.service.EnderecoService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ public class EnderecoController {
     }
 
     @GetMapping
-    public Page<Endereco> listar(Pageable pageable){
+    public Page<Endereco> listar(@ParameterObject Pageable pageable){
         return enderecoService.listar(pageable);
     }
 

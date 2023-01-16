@@ -6,6 +6,7 @@ import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.service.PessoaService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class PessoaController {
     }
 
     @GetMapping
-    public Page<PessoaDTO> listar(@RequestParam(required = false) String nome, Pageable pageable){
+    public Page<PessoaDTO> listar(@RequestParam(required = false) String nome, @ParameterObject Pageable pageable){
         return pessoaService.listar(nome, pageable);
     }
 
