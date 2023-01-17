@@ -38,4 +38,9 @@ public class Pessoa {
             inverseJoinColumns={@JoinColumn(name="ENDERECO_ID")})
     private Set<Endereco> enderecos = new HashSet<>();
 
+    public Pessoa(String nome, LocalDate dataNascimento){
+        this.nome = nome;
+        this.dataNascimento = dataNascimento;
+    }
+
 }
