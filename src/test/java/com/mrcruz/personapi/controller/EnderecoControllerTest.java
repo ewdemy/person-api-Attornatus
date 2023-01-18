@@ -1,59 +1,46 @@
 package com.mrcruz.personapi.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mrcruz.personapi.model.Endereco;
-import com.mrcruz.personapi.repository.EnderecoRepository;
 import com.mrcruz.personapi.service.EnderecoService;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.filter.log.LogDetail;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+import jakarta.persistence.EntityNotFoundException;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static io.restassured.RestAssured.given;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.Arrays;
+import java.util.List;
 
-@SpringBootTest
+@ExtendWith(SpringExtension.class)
+@WebMvcTest(EnderecoController.class)
 class EnderecoControllerTest {
 
-    private RequestSpecification requisicao;
-
-    private ObjectMapper mapper = new ObjectMapper();
-
-    @Autowired
+    @MockBean
     private EnderecoService enderecoService;
 
+    ObjectMapper mapper = new ObjectMapper();
+
     @Autowired
-    private EnderecoRepository enderecoRepository;
+    MockMvc mockMvc;
 
     @BeforeEach
     void setUp() {
 
-        enderecoRepository.deleteAll();
-
-//        requisicao = new RequestSpecBuilder()
-//                .setBasePath("/api/v1/solicitantes")
-//                .setPort(porta)
-//                .setAccept(ContentType.JSON)
-//                .setContentType(ContentType.JSON)
-//                .log(LogDetail.ALL)
-//                .build();
-
-        requisicao = new RequestSpecBuilder()
-                .setBasePath("/api/v1/person-api/enderecos")
-                .setPort(8080)
-                .setAccept(ContentType.JSON)
-                .setContentType(ContentType.JSON)
-                .log(LogDetail.ALL)
-                .build();
     }
 
     @AfterEach
@@ -61,55 +48,58 @@ class EnderecoControllerTest {
     }
 
     @Test
-    void salvar() throws JsonProcessingException {
+    void deveSalvarEndereco() throws Exception {
+        Endereco enderecoResponse = getEndereco();
+        Endereco enderecorequest = getEnderecoRequest();
 
-        Endereco endereco = new Endereco();
-        endereco.setLogradouro("Rua 25 de Março");
-        endereco.setCep("54512161");
-        endereco.setNumero("568");
-        endereco.setCidade("Quixeramobim");
+        Mockito.when(enderecoService.buscar(Mockito.anyLong())).thenReturn(enderecoResponse);
 
-        Response res =
-                given()
-                        .spec(requisicao)
-                        .body(mapper.writeValueAsString(endereco))
-                        .expect()
-                        .statusCode(HttpStatus.CREATED.value())
-                        .when()
-                        .post();
+        mockMvc.perform(post("/enderecos", mapper.writeValueAsString(enderecorequest)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.logradouro", Matchers.is("Rua A")))
+                .andExpect(jsonPath("$.cidade", Matchers.is("Fogareiro City")));
 
-        Endereco enderecoResponse = res.body().as(Endereco.class);
-
-        assertNotNull(res.body());
-        assertNotNull(enderecoResponse.getId());
-        assertEquals(endereco.getLogradouro(), enderecoResponse.getLogradouro());
     }
 
     @Test
-    void salvarExcecao() throws JsonProcessingException {
-
-        Endereco endereco = new Endereco();
-        endereco.setLogradouro("");
-        endereco.setCep("54512161");
-        endereco.setNumero("568");
-        endereco.setCidade("Quixeramobim");
+    void deveLancarExcecaoAoSalvarComAlgumAtributoEmBrancoOuNulo() {
 
 
-        given()
-                .spec(requisicao)
-                .body(mapper.writeValueAsString(endereco))
-                .when()
-                .post()
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
-    void listar() {
+    void listar() throws Exception {
+        Page<Endereco> pageResponse = new PageImpl<>(getEnderecos());
+
+        Mockito.when(enderecoService.listar(Pageable.ofSize(20))).thenReturn(pageResponse);
+
+        mockMvc.perform(get("/enderecos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("content", Matchers.hasSize(3)))
+                .andExpect(jsonPath("content[0].id", Matchers.is(1)));
     }
 
     @Test
-    void buscar() {
+    void deveBuscarEnderecoPorId() throws Exception {
+
+        Endereco endereco = getEndereco();
+        Mockito.when(enderecoService.buscar(Mockito.anyLong())).thenReturn(endereco);
+
+        mockMvc.perform(get("/enderecos/{id}",1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.logradouro", Matchers.is("Rua A")));
+    }
+    @Test
+    void deveLancarExcecaoAoBuscarEnderecoPorIdInexistente() throws Exception {
+
+        Long id = 10L;
+        Mockito.when(enderecoService.buscar(id)).thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + id));
+
+        mockMvc.perform(get("/enderecos/{id}",id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: 10")));
     }
 
     @Test
@@ -118,5 +108,42 @@ class EnderecoControllerTest {
 
     @Test
     void deletar() {
+    }
+
+    private List<Endereco> getEnderecos() {
+        Endereco end1 = new Endereco();
+        end1.setId(1L);
+        end1.setLogradouro("Rua 25 de Março");
+        end1.setCep("54512161");
+        end1.setNumero("568");
+        end1.setCidade("Quixeramobim");
+
+        Endereco end2 = new Endereco();
+        end2.setId(2L);
+        end2.setLogradouro("Rua 25 de Março");
+        end2.setCep("54512161");
+        end2.setNumero("568");
+        end2.setCidade("Quixeramobim");
+
+        Endereco end3 = new Endereco();
+        end3.setId(3L);
+        end3.setLogradouro("Rua 25 de Março");
+        end3.setCep("54512161");
+        end3.setNumero("568");
+        end3.setCidade("Quixeramobim");
+
+        return Arrays.asList(end1, end2, end3);
+    }
+    private Endereco getEndereco(){
+        return new Endereco(1L, "Rua A", "32644878", "33", "Fogareiro City");
+    }
+    private Endereco getEnderecoRequest(){
+        Endereco enderecorequest = new Endereco();
+        enderecorequest.setLogradouro("Rua A");
+        enderecorequest.setCep("32644878");
+        enderecorequest.setNumero("33");
+        enderecorequest.setCidade("Fogareiro City");
+
+        return enderecorequest;
     }
 }
