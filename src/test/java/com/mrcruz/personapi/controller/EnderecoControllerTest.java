@@ -2,6 +2,7 @@ package com.mrcruz.personapi.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.service.EnderecoService;
@@ -18,8 +19,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -52,19 +58,30 @@ class EnderecoControllerTest {
         Endereco enderecoResponse = getEndereco();
         Endereco enderecorequest = getEnderecoRequest();
 
-        Mockito.when(enderecoService.buscar(Mockito.anyLong())).thenReturn(enderecoResponse);
+        Mockito.when(enderecoService.salvar(Mockito.any(Endereco.class))).thenReturn(enderecoResponse);
 
-        mockMvc.perform(post("/enderecos", mapper.writeValueAsString(enderecorequest)))
+        mockMvc.perform(post("/enderecos")
+                        .content(mapper.writeValueAsString(enderecorequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", Matchers.is(1)))
                 .andExpect(jsonPath("$.logradouro", Matchers.is("Rua A")))
                 .andExpect(jsonPath("$.cidade", Matchers.is("Fogareiro City")));
-
     }
 
     @Test
-    void deveLancarExcecaoAoSalvarComAlgumAtributoEmBrancoOuNulo() {
+    void deveLancarExcecaoAoSalvarComAlgumAtributoEmBrancoOuNulo() throws Exception {
+        Endereco enderecorequest = getEnderecoRequest();
+        enderecorequest.setLogradouro("");
 
+
+        mockMvc.perform(post("/enderecos")
+                        .content(mapper.writeValueAsString(enderecorequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Um ou mais campos inválidos, preencha corretamente!")));
 
     }
 
@@ -103,7 +120,35 @@ class EnderecoControllerTest {
     }
 
     @Test
-    void atualizar() {
+    void deveAtualizarEndereco() throws Exception {
+        Endereco enderecoResponse = getEndereco();
+        Endereco enderecorequest = getEnderecoRequest();
+
+        Mockito.when(enderecoService.atualizar(Mockito.anyLong(), Mockito.any(Endereco.class))).thenReturn(enderecoResponse);
+
+        mockMvc.perform(put("/enderecos/{id}",1L)
+                        .content(mapper.writeValueAsString(enderecorequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.logradouro", Matchers.is("Rua A")));
+    }
+
+    @Test
+    void deveLancarExcecaoAoAtualizarrEnderecoComIdInexistente() throws Exception {
+
+        Long id = 10L;
+        Endereco enderecorequest = getEnderecoRequest();
+
+        Mockito.when(enderecoService.atualizar(Mockito.anyLong(), Mockito.any(Endereco.class))).thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + id));
+
+        mockMvc.perform(put("/enderecos/{id}",id)
+                        .content(mapper.writeValueAsString(enderecorequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: 10")));
     }
 
     @Test
