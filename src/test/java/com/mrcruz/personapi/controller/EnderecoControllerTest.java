@@ -1,8 +1,5 @@
 package com.mrcruz.personapi.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.service.EnderecoService;
@@ -22,15 +19,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(EnderecoController.class)
@@ -82,7 +77,6 @@ class EnderecoControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.mensagem", Matchers.is("Um ou mais campos inválidos, preencha corretamente!")));
-
     }
 
     @Test
@@ -152,7 +146,39 @@ class EnderecoControllerTest {
     }
 
     @Test
-    void deletar() {
+    void deveLancarExcecaoAoAtualizarComAlgumAtributoEmBrancoOuNulo() throws Exception {
+        Endereco enderecorequest = getEnderecoRequest();
+        enderecorequest.setLogradouro("");
+
+
+        mockMvc.perform(put("/enderecos/{id}", 1L)
+                        .content(mapper.writeValueAsString(enderecorequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Um ou mais campos inválidos, preencha corretamente!")));
+    }
+
+    @Test
+    void deveDeletarEndereco() throws Exception {
+        Long id = 10L;
+
+        Mockito.doNothing().when(enderecoService).deletar(id);
+
+        mockMvc.perform(delete("/enderecos/{id}",id))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deveLancarExcecaoAoDeletarEnderecoComIdInexistente() throws Exception {
+
+        Long id = 10L;
+
+        Mockito.doThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + id)).when(enderecoService).deletar(id);
+
+        mockMvc.perform(delete("/enderecos/{id}",id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: 10")));
     }
 
     private List<Endereco> getEnderecos() {
