@@ -287,15 +287,67 @@ class PessoaControllerTest {
     }
 
     @Test
-    void adicionarEnderecoPrincipal() {
-    }
+    void adicionarEnderecoPrincipal() throws Exception {
+        Mockito.when(pessoaService.adicionarEnderecoPrincipal(Mockito.anyLong(), Mockito.anyLong()))
+                .thenReturn(getPessoaComEndereco());
 
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco-principal/{id-endereco}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.enderecoPrincipal", Matchers.notNullValue(Endereco.class)))
+                .andExpect(jsonPath("$.enderecoPrincipal.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.enderecoPrincipal.logradouro", Matchers.is("Rua 25 de Março")));
+    }
 
     @Test
-    void buscarEnderecosPessoa() {
+    void deveLancarExcecaoAoAdicionarEnderecoPrincipalAPessoaInexistente() throws Exception {
+
+        Long idPessoa = 10L;
+        Long idEndereco = 1L;
+
+        Mockito.when(pessoaService.adicionarEnderecoPrincipal(Mockito.anyLong(), Mockito.anyLong())).thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + idPessoa));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco-principal/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + idPessoa)));
     }
 
+    @Test
+    void deveLancarExcecaoAoAdicionarEnderecoPrincipalInexistenteAPessoa() throws Exception {
 
+        Long idPessoa = 1L;
+        Long idEndereco = 10L;
+
+        Mockito.when(pessoaService.adicionarEnderecoPrincipal(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + idEndereco));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco-principal/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: " + idEndereco)));
+    }
+
+    @Test
+    void deveLancarExcecaoAoAdicionarEnderecoPrincipalQueNaoPertenceAPessoa() throws Exception {
+
+        Long idPessoa = 1L;
+        Long idEndereco = 10L;
+
+        Mockito.when(pessoaService.adicionarEnderecoPrincipal(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new UnsupportedOperationException("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco-principal/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco)));
+    }
+
+    @Test
+    void deveBuscarEnderecosDaPessoa() throws Exception {
+        Mockito.when(pessoaService.buscarEnderecosPessoa(Mockito.anyLong())).thenReturn(getEnderecos());
+
+        mockMvc.perform(get("/pessoas/{id}/enderecos", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", Matchers.hasSize(3)));
+    }
 
 
     private PessoaRequest getPessoaRequest(){
@@ -336,5 +388,29 @@ class PessoaControllerTest {
 
     private List<PessoaDTO> getPessoasDTOComFiltro(String filtro){
         return getPessoasDTO().stream().filter(pessoaDTO -> pessoaDTO.getNome().contains(filtro)).collect(Collectors.toList());
+    }
+    private Set<Endereco> getEnderecos() {
+        Endereco end1 = new Endereco();
+        end1.setId(1L);
+        end1.setLogradouro("Rua 25 de Março");
+        end1.setCep("54512161");
+        end1.setNumero("568");
+        end1.setCidade("Quixeramobim");
+
+        Endereco end2 = new Endereco();
+        end2.setId(2L);
+        end2.setLogradouro("Rua 25 de Março");
+        end2.setCep("54512161");
+        end2.setNumero("568");
+        end2.setCidade("Quixeramobim");
+
+        Endereco end3 = new Endereco();
+        end3.setId(3L);
+        end3.setLogradouro("Rua 25 de Março");
+        end3.setCep("54512161");
+        end3.setNumero("568");
+        end3.setCidade("Quixeramobim");
+
+        return Set.of(end1, end2, end3);
     }
 }
