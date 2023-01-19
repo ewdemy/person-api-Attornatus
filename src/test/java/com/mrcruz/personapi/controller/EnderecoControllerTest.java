@@ -69,7 +69,7 @@ class EnderecoControllerTest {
     }
 
     @Test
-    void listar() throws Exception {
+    void deveListarEndereco() throws Exception {
         Page<Endereco> pageResponse = new PageImpl<>(getEnderecos());
 
         Mockito.when(enderecoService.listar(Pageable.ofSize(20))).thenReturn(pageResponse);
