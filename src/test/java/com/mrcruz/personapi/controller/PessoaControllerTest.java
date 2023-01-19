@@ -207,6 +207,35 @@ class PessoaControllerTest {
     }
 
     @Test
+    void deveLancarExcecaoAoAdicionarEnderecoAPessoaInexistente() throws Exception {
+
+        Long idPessoa = 10L;
+        Long idEndereco = 1L;
+
+        Mockito.when(pessoaService.adicionarEndereco(Mockito.anyLong(), Mockito.anyLong())).thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + idPessoa));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + idPessoa)));
+    }
+
+    @Test
+    void deveLancarExcecaoAoAdicionarEnderecoInexistenteAPessoa() throws Exception {
+
+        Long idPessoa = 1L;
+        Long idEndereco = 10L;
+
+        Mockito.when(pessoaService.adicionarEndereco(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + idEndereco));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: " + idEndereco)));
+    }
+
+
+
+    @Test
     void adicionarEnderecoPrincipal() {
     }
 
