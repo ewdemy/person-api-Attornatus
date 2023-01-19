@@ -2,6 +2,7 @@ package com.mrcruz.personapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.model.PessoaRequest;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -190,7 +192,18 @@ class PessoaControllerTest {
     }
 
     @Test
-    void adicionarEndereco() {
+    void deveAdicionarEnderecoAPessoa() throws Exception {
+
+        Mockito.when(pessoaService.adicionarEndereco(Mockito.anyLong(), Mockito.anyLong()))
+                .thenReturn(getPessoaComEndereco());
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/adicionar-endereco/{id-endereco}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.enderecoPrincipal", Matchers.notNullValue(Endereco.class)))
+                .andExpect(jsonPath("$.enderecoPrincipal.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.enderecos", Matchers.notNullValue()))
+                .andExpect(jsonPath("$.enderecos", Matchers.hasSize(1)));
     }
 
     @Test
@@ -210,9 +223,27 @@ class PessoaControllerTest {
     }
 
     private Pessoa getPessoa(){
+
         Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 05));
         pessoa.setId(1L);
         return pessoa;
+    }
+    private Pessoa getPessoaComEndereco(){
+        Endereco endereco = new Endereco();
+        endereco.setId(1L);
+        endereco.setLogradouro("Rua 25 de Março");
+        endereco.setCep("54512161");
+        endereco.setNumero("568");
+        endereco.setCidade("Quixeramobim");
+
+        Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 05));
+        pessoa.setId(1L);
+        pessoa.setEnderecoPrincipal(endereco);
+        pessoa.setEnderecos(Set.of(endereco));
+        return pessoa;
+    }
+    private Endereco getEndereco(){
+        return new Endereco(1L, "Rua A", "32644878", "33", "Fogareiro City");
     }
     private List<PessoaDTO> getPessoasDTO(){
         PessoaDTO p1 = new  PessoaDTO(1L, "Bob Jhon", LocalDate.of(1995, 10, 05), null);
