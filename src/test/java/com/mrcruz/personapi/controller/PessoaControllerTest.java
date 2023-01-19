@@ -233,19 +233,70 @@ class PessoaControllerTest {
                 .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: " + idEndereco)));
     }
 
+    @Test
+    void deveRemoverEnderecoDaPessoa() throws Exception {
+        Mockito.when(pessoaService.removerEndereco(Mockito.anyLong(), Mockito.anyLong()))
+                .thenReturn(getPessoa());
 
+        mockMvc.perform(put("/pessoas/{id-pessoa}/remover-endereco/{id-endereco}", 1L, 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.enderecoPrincipal", Matchers.nullValue()))
+                .andExpect(jsonPath("$.enderecos", Matchers.empty()));
+    }
+
+    @Test
+    void deveLancarExcecaoAoRemoverEnderecoAPessoaInexistente() throws Exception {
+
+        Long idPessoa = 10L;
+        Long idEndereco = 1L;
+
+        Mockito.when(pessoaService.removerEndereco(Mockito.anyLong(), Mockito.anyLong())).thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + idPessoa));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/remover-endereco/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + idPessoa)));
+    }
+
+    @Test
+    void deveLancarExcecaoAoRemoverEnderecoInexistenteAPessoa() throws Exception {
+
+        Long idPessoa = 1L;
+        Long idEndereco = 10L;
+
+        Mockito.when(pessoaService.removerEndereco(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: " + idEndereco));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/remover-endereco/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Endereço não encontrado com ID: " + idEndereco)));
+    }
+
+    @Test
+    void deveLancarExcecaoAoRemoverEnderecoQueNaoPertenceAPessoa() throws Exception {
+
+        Long idPessoa = 1L;
+        Long idEndereco = 10L;
+
+        Mockito.when(pessoaService.removerEndereco(Mockito.anyLong(), Mockito.anyLong()))
+                .thenThrow(new UnsupportedOperationException("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco));
+
+        mockMvc.perform(put("/pessoas/{id-pessoa}/remover-endereco/{id-endereco}", idPessoa, idEndereco))
+                .andExpect(status().isNotAcceptable())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa com ID: " + idPessoa + " não possui endereço com ID: " + idEndereco)));
+    }
 
     @Test
     void adicionarEnderecoPrincipal() {
     }
 
-    @Test
-    void removerEndereco() {
-    }
 
     @Test
     void buscarEnderecosPessoa() {
     }
+
+
+
 
     private PessoaRequest getPessoaRequest(){
         return new PessoaRequest("Bob Jhon", LocalDate.of(1995, 10, 05));

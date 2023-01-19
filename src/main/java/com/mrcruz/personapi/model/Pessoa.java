@@ -16,7 +16,6 @@ import java.util.Set;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Entity
 public class Pessoa {
 
