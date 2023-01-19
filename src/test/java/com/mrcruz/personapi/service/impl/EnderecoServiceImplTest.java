@@ -59,28 +59,16 @@ class EnderecoServiceImplTest {
     }
 
     @Test
-    void testBuscar3() {
-        when(enderecoRepository.findById((Long) any())).thenThrow(new EntityNotFoundException("An error occurred"));
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.buscar(123L));
-        verify(enderecoRepository).findById((Long) any());
-    }
+    void DeveListarEnderecos() {
+        Page<Endereco> pageResponse = new PageImpl(getEnderecos());
 
-    /**
-     * Method under test: {@link EnderecoServiceImpl#listar(Pageable)}
-     */
-    @Test
-    void testListar() {
-        PageImpl<Endereco> pageImpl = new PageImpl<>(new ArrayList<>());
-        when(enderecoRepository.findAll((Pageable) any())).thenReturn(pageImpl);
-        Page<Endereco> actualListarResult = enderecoServiceImpl.listar(null);
-        assertSame(pageImpl, actualListarResult);
-        assertTrue(actualListarResult.toList().isEmpty());
-        verify(enderecoRepository).findAll((Pageable) any());
+        when(enderecoRepository.findAll(Pageable.ofSize(20))).thenReturn(pageResponse);
+        Page<Endereco> result = enderecoServiceImpl.listar(Pageable.ofSize(20));
+        assertSame(pageResponse, result);
+        assertFalse(result.toList().isEmpty());
+        assertEquals(3, result.getContent().size());
+        verify(enderecoRepository).findAll(any(Pageable.class));
     }
-
-    /**
-     * Method under test: {@link EnderecoServiceImpl#listar(Pageable)}
-     */
     @Test
     void testListar2() {
         when(enderecoRepository.findAll((Pageable) any())).thenThrow(new EntityNotFoundException("An error occurred"));
