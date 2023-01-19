@@ -6,8 +6,8 @@ import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.model.PessoaRequest;
 import com.mrcruz.personapi.service.PessoaService;
+import jakarta.persistence.EntityNotFoundException;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -104,7 +105,25 @@ class PessoaControllerTest {
     }
 
     @Test
-    void buscar() {
+    void deveBuscarPessoa() throws Exception {
+
+        Mockito.when(pessoaService.buscar(Mockito.anyLong())).thenReturn(getPessoa());
+
+        mockMvc.perform(get("/pessoas/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.nome", Matchers.is("Bob Jhon")));
+    }
+
+    @Test
+    void deveLancarAoBuscarPessoaComIdInexistente() throws Exception {
+        Long id = 10L;
+
+        Mockito.when(pessoaService.buscar(Mockito.anyLong())).thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + id));
+
+        mockMvc.perform(get("/pessoas/{id}", id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + id)));
     }
 
     @Test
