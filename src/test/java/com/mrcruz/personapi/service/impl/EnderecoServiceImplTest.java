@@ -70,99 +70,41 @@ class EnderecoServiceImplTest {
         verify(enderecoRepository).findAll(any(Pageable.class));
     }
     @Test
-    void testListar2() {
-        when(enderecoRepository.findAll((Pageable) any())).thenThrow(new EntityNotFoundException("An error occurred"));
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.listar(null));
-        verify(enderecoRepository).findAll((Pageable) any());
+    void DeveTrazerArryVazioQuandoListarEnderecos() {
+        Page<Endereco> pageResponse = new PageImpl(new ArrayList<>());
+
+        when(enderecoRepository.findAll(any(Pageable.class))).thenReturn(pageResponse);
+        Page<Endereco> result = enderecoServiceImpl.listar(Pageable.ofSize(20));
+        assertSame(pageResponse, result);
+        assertTrue(result.toList().isEmpty());
+        verify(enderecoRepository).findAll(any(Pageable.class));
     }
 
-    /**
-     * Method under test: {@link EnderecoServiceImpl#atualizar(Long, Endereco)}
-     */
     @Test
-    void testAtualizar() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        Optional<Endereco> ofResult = Optional.of(endereco);
+    void deveAtualizarEndereco() {
+        Endereco endereco = getEndereco();
 
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-        when(enderecoRepository.save((Endereco) any())).thenReturn(endereco1);
-        when(enderecoRepository.findById((Long) any())).thenReturn(ofResult);
+        Optional<Endereco> enderecoOptional = Optional.of(endereco);
 
-        Endereco endereco2 = new Endereco();
-        endereco2.setCep("Cep");
-        endereco2.setCidade("Cidade");
-        endereco2.setId(123L);
-        endereco2.setLogradouro("Logradouro");
-        endereco2.setNumero("Numero");
-        assertSame(endereco1, enderecoServiceImpl.atualizar(123L, endereco2));
-        verify(enderecoRepository).save((Endereco) any());
-        verify(enderecoRepository).findById((Long) any());
-        assertEquals(123L, endereco2.getId().longValue());
+        when(enderecoRepository.findById(anyLong())).thenReturn(enderecoOptional);
+        when(enderecoRepository.save(any(Endereco.class))).thenReturn(endereco);
+
+        assertSame(endereco, enderecoServiceImpl.atualizar(1L, getEnderecoRequest()));
+        verify(enderecoRepository).findById(anyLong());
+        verify(enderecoRepository).save(any(Endereco.class));
     }
 
-    /**
-     * Method under test: {@link EnderecoServiceImpl#atualizar(Long, Endereco)}
-     */
     @Test
-    void testAtualizar2() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        Optional<Endereco> ofResult = Optional.of(endereco);
-        when(enderecoRepository.save((Endereco) any())).thenThrow(new EntityNotFoundException("An error occurred"));
-        when(enderecoRepository.findById((Long) any())).thenReturn(ofResult);
-
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.atualizar(123L, endereco1));
-        verify(enderecoRepository).save((Endereco) any());
-        verify(enderecoRepository).findById((Long) any());
+    void develancarExcecaoAtualizarEnderecoComIdInexistente() {
+        Endereco endereco = getEnderecoRequest();
+        when(enderecoRepository.findById(anyLong())).thenReturn(Optional.empty());
+        var exception = assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.atualizar(10L, endereco));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Endereço não encontrado com ID: 10", exception.getMessage());
+        verify(enderecoRepository).findById(anyLong());
+        verify(enderecoRepository, never()).save(any(Endereco.class));
     }
 
-    /**
-     * Method under test: {@link EnderecoServiceImpl#atualizar(Long, Endereco)}
-     */
-    @Test
-    void testAtualizar3() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        when(enderecoRepository.save((Endereco) any())).thenReturn(endereco);
-        when(enderecoRepository.findById((Long) any())).thenReturn(Optional.empty());
-
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.atualizar(123L, endereco1));
-        verify(enderecoRepository).findById((Long) any());
-    }
-
-    /**
-     * Method under test: {@link EnderecoServiceImpl#deletar(Long)}
-     */
     @Test
     void testDeletar() {
         Endereco endereco = new Endereco();
