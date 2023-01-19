@@ -54,12 +54,6 @@
 			<artifactId>springdoc-openapi-starter-common</artifactId>
 			<version>2.0.2</version>
 		</dependency>
-		<dependency>
-			<groupId>io.rest-assured</groupId>
-			<artifactId>rest-assured</artifactId>
-			<version>5.3.0</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 	<build>

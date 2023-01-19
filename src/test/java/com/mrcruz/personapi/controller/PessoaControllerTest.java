@@ -141,14 +141,14 @@ class PessoaControllerTest {
     }
 
     @Test
-    void atualizar() throws Exception {
+    void deveLancarExcecaoAoAtualizarPessoaComIdInexistente() throws Exception {
         Long id = 10L;
         PessoaRequest pessoaRequest = getPessoaRequest();
 
         Mockito.when(pessoaService.atualizar(Mockito.anyLong(), Mockito.any(PessoaRequest.class)))
                 .thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + id));
 
-        mockMvc.perform(put("/pessoas/{id}", 1L)
+        mockMvc.perform(put("/pessoas/{id}", id)
                         .content(mapper.writeValueAsString(pessoaRequest))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
@@ -157,7 +157,7 @@ class PessoaControllerTest {
     }
 
     @Test
-    void atualizarex() throws Exception {
+    void deveLancarExcecaoAoAtualizarPessoaComNomeEmBrancoOuNulo() throws Exception {
         PessoaRequest pessoaRequest = getPessoaRequest();
         pessoaRequest.setNome("");
 
@@ -169,7 +169,24 @@ class PessoaControllerTest {
                 .andExpect(jsonPath("$.mensagem", Matchers.is("Um ou mais campos inválidos, preencha corretamente!")));
     }
     @Test
-    void deletar() {
+    void deveDeletarPessoa() throws Exception {
+        Long id = 1L;
+
+        Mockito.doNothing().when(pessoaService).deletar(id);
+
+        mockMvc.perform(delete("/pessoas/{id}",id))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void deveLancarExcecaoAoDeletarPessoaComIdInexistente() throws Exception {
+        Long id = 10L;
+
+        Mockito.doThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + id)).when(pessoaService).deletar(id);
+
+        mockMvc.perform(delete("/pessoas/{id}",id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + id)));
     }
 
     @Test
