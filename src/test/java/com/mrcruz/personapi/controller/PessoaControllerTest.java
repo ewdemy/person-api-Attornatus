@@ -27,8 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -127,9 +126,48 @@ class PessoaControllerTest {
     }
 
     @Test
-    void atualizar() {
+    void deveAtualizarPessoa() throws Exception {
+        PessoaRequest pessoaRequest = getPessoaRequest();
+
+        Mockito.when(pessoaService.atualizar(Mockito.anyLong(), Mockito.any(PessoaRequest.class))).thenReturn(getPessoa());
+
+        mockMvc.perform(put("/pessoas/{id}", 1L)
+                        .content(mapper.writeValueAsString(pessoaRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", Matchers.is(1)))
+                .andExpect(jsonPath("$.nome", Matchers.is("Bob Jhon")));
     }
 
+    @Test
+    void atualizar() throws Exception {
+        Long id = 10L;
+        PessoaRequest pessoaRequest = getPessoaRequest();
+
+        Mockito.when(pessoaService.atualizar(Mockito.anyLong(), Mockito.any(PessoaRequest.class)))
+                .thenThrow(new EntityNotFoundException("Pessoa não encontrada com ID: " + id));
+
+        mockMvc.perform(put("/pessoas/{id}", 1L)
+                        .content(mapper.writeValueAsString(pessoaRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Pessoa não encontrada com ID: " + id)));
+    }
+
+    @Test
+    void atualizarex() throws Exception {
+        PessoaRequest pessoaRequest = getPessoaRequest();
+        pessoaRequest.setNome("");
+
+        mockMvc.perform(put("/pessoas/{id}", 1L)
+                        .content(mapper.writeValueAsString(pessoaRequest))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem", Matchers.is("Um ou mais campos inválidos, preencha corretamente!")));
+    }
     @Test
     void deletar() {
     }
