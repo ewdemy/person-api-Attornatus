@@ -106,49 +106,26 @@ class EnderecoServiceImplTest {
     }
 
     @Test
-    void testDeletar() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        Optional<Endereco> ofResult = Optional.of(endereco);
-        doNothing().when(enderecoRepository).delete((Endereco) any());
-        when(enderecoRepository.findById((Long) any())).thenReturn(ofResult);
-        enderecoServiceImpl.deletar(123L);
-        verify(enderecoRepository).findById((Long) any());
-        verify(enderecoRepository).delete((Endereco) any());
+    void deveDeletarEndereco() {
+        Endereco endereco = getEndereco();
+        Optional<Endereco> result = Optional.of(endereco);
+
+        when(enderecoRepository.findById(anyLong())).thenReturn(result);
+        doNothing().when(enderecoRepository).delete(any(Endereco.class));
+
+        enderecoServiceImpl.deletar(1L);
+        verify(enderecoRepository).findById(anyLong());
+        verify(enderecoRepository).delete(any(Endereco.class));
     }
 
-    /**
-     * Method under test: {@link EnderecoServiceImpl#deletar(Long)}
-     */
     @Test
-    void testDeletar2() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        Optional<Endereco> ofResult = Optional.of(endereco);
-        doThrow(new EntityNotFoundException("An error occurred")).when(enderecoRepository).delete((Endereco) any());
-        when(enderecoRepository.findById((Long) any())).thenReturn(ofResult);
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.deletar(123L));
-        verify(enderecoRepository).findById((Long) any());
-        verify(enderecoRepository).delete((Endereco) any());
-    }
-
-    /**
-     * Method under test: {@link EnderecoServiceImpl#deletar(Long)}
-     */
-    @Test
-    void testDeletar3() {
-        doNothing().when(enderecoRepository).delete((Endereco) any());
-        when(enderecoRepository.findById((Long) any())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.deletar(123L));
-        verify(enderecoRepository).findById((Long) any());
+    void deveLancarExcecaoAoDeletarEnderecoComIdInexistente() {
+        when(enderecoRepository.findById(anyLong())).thenReturn(Optional.empty());
+        var exception = assertThrows(EntityNotFoundException.class, () -> enderecoServiceImpl.deletar(10L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Endereço não encontrado com ID: 10", exception.getMessage());
+        verify(enderecoRepository).findById(anyLong());
+        verify(enderecoRepository, never()).delete(any(Endereco.class));
     }
 
     private List<Endereco> getEnderecos() {
