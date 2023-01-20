@@ -17,6 +17,7 @@
 
 * Java 17
 * Maven
+* Lombok
 
 ## 🚀 Instalando
 
