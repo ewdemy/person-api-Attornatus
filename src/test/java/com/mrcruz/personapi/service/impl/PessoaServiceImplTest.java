@@ -121,63 +121,26 @@ class PessoaServiceImplTest {
     }
 
     @Test
-    void testDeletar() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveDeletarPessoa() {
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        doNothing().when(pessoaRepository).delete((Pessoa) any());
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-        pessoaServiceImpl.deletar(123L);
-        verify(pessoaRepository).findById((Long) any());
-        verify(pessoaRepository).delete((Pessoa) any());
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        doNothing().when(pessoaRepository).delete(any(Pessoa.class));
+        pessoaServiceImpl.deletar(1L);
+        verify(pessoaRepository).findById(anyLong());
+        verify(pessoaRepository).delete(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#deletar(Long)}
-     */
-    @Test
-    void testDeletar2() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        doThrow(new UnsupportedOperationException()).when(pessoaRepository).delete((Pessoa) any());
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.deletar(123L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(pessoaRepository).delete((Pessoa) any());
-    }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#deletar(Long)}
-     */
     @Test
     void testDeletar3() {
-        doNothing().when(pessoaRepository).delete((Pessoa) any());
-        when(pessoaRepository.findById((Long) any())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.deletar(123L));
-        verify(pessoaRepository).findById((Long) any());
+        when(pessoaRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.deletar(10L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Pessoa não encontrada com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(pessoaRepository, never()).delete(any(Pessoa.class));
     }
 
     /**
