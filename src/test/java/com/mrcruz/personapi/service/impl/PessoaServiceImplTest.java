@@ -133,7 +133,7 @@ class PessoaServiceImplTest {
     }
 
     @Test
-    void testDeletar3() {
+    void deveLancarExcecaoAoDeletarPessoaComIdInexistente() {
         when(pessoaRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.deletar(10L));
@@ -143,283 +143,99 @@ class PessoaServiceImplTest {
         verify(pessoaRepository, never()).delete(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#adicionarEndereco(Long, Long)}
-     */
     @Test
-    void testAdicionarEndereco() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveAdicionarEnderecoAPessoa() {
+        Endereco endereco = getEndereco();
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
+        Pessoa pessoaComEndereco = getPessoaComEndereco();
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        when(enderecoService.buscar(anyLong())).thenReturn(endereco);
+        when(pessoaRepository.save(any(Pessoa.class))).thenReturn(pessoaComEndereco);
 
-        Pessoa pessoa1 = new Pessoa();
-        pessoa1.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa1.setEnderecoPrincipal(endereco1);
-        pessoa1.setEnderecos(new HashSet<>());
-        pessoa1.setId(123L);
-        pessoa1.setNome("Nome");
-        when(pessoaRepository.save((Pessoa) any())).thenReturn(pessoa1);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
+        pessoaServiceImpl.adicionarEndereco(1L, 1L);
 
-        Endereco endereco2 = new Endereco();
-        endereco2.setCep("Cep");
-        endereco2.setCidade("Cidade");
-        endereco2.setId(123L);
-        endereco2.setLogradouro("Logradouro");
-        endereco2.setNumero("Numero");
-        when(enderecoService.buscar((Long) any())).thenReturn(endereco2);
-        assertSame(pessoa1, pessoaServiceImpl.adicionarEndereco(1L, 1L));
-        verify(pessoaRepository).save((Pessoa) any());
-        verify(pessoaRepository).findById((Long) any());
-        verify(enderecoService).buscar((Long) any());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService).buscar(anyLong());
+        verify(pessoaRepository).save(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#adicionarEndereco(Long, Long)}
-     */
     @Test
-    void testAdicionarEndereco2() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveLancarExcecaoAoAdicionarEnderecoAPessoaComIdInexistente() {
+        when(pessoaRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-
-        Pessoa pessoa1 = new Pessoa();
-        pessoa1.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa1.setEnderecoPrincipal(endereco1);
-        pessoa1.setEnderecos(new HashSet<>());
-        pessoa1.setId(123L);
-        pessoa1.setNome("Nome");
-        when(pessoaRepository.save((Pessoa) any())).thenReturn(pessoa1);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-        when(enderecoService.buscar((Long) any())).thenThrow(new UnsupportedOperationException());
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.adicionarEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(enderecoService).buscar((Long) any());
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(10L, 1L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Pessoa não encontrada com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService, never()).buscar(anyLong());
+        verify(pessoaRepository, never()).save(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#adicionarEndereco(Long, Long)}
-     */
     @Test
-    void testAdicionarEndereco3() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveLancarExcecaoAoAdicionarEnderecoComIdInexistenteAPessoa() {
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        when(pessoaRepository.save((Pessoa) any())).thenReturn(pessoa);
-        when(pessoaRepository.findById((Long) any())).thenReturn(Optional.empty());
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        when(enderecoService.buscar(anyLong())).thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: 10"));
 
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(1L, 10L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Endereço não encontrado com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService).buscar(anyLong());
+        verify(pessoaRepository, never()).save(any(Pessoa.class));
+    }
+    //--------------------------------
+    @Test
+    void deveRemoverEnderecoAPessoa() {
+        Endereco endereco = getEndereco();
 
-        Endereco endereco2 = new Endereco();
-        endereco2.setCep("Cep");
-        endereco2.setCidade("Cidade");
-        endereco2.setId(123L);
-        endereco2.setLogradouro("Logradouro");
-        endereco2.setNumero("Numero");
-        Pessoa pessoa1 = mock(Pessoa.class);
-        when(pessoa1.getEnderecoPrincipal()).thenReturn(endereco2);
-        when(pessoa1.getEnderecos()).thenReturn(new HashSet<>());
-        doNothing().when(pessoa1).setDataNascimento((LocalDate) any());
-        doNothing().when(pessoa1).setEnderecoPrincipal((Endereco) any());
-        doNothing().when(pessoa1).setEnderecos((Set<Endereco>) any());
-        doNothing().when(pessoa1).setId((Long) any());
-        doNothing().when(pessoa1).setNome((String) any());
-        pessoa1.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa1.setEnderecoPrincipal(endereco1);
-        pessoa1.setEnderecos(new HashSet<>());
-        pessoa1.setId(123L);
-        pessoa1.setNome("Nome");
+        Pessoa pessoaComEndereco = getPessoaComEndereco();
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Endereco endereco3 = new Endereco();
-        endereco3.setCep("Cep");
-        endereco3.setCidade("Cidade");
-        endereco3.setId(123L);
-        endereco3.setLogradouro("Logradouro");
-        endereco3.setNumero("Numero");
-        when(enderecoService.buscar((Long) any())).thenReturn(endereco3);
-        assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(pessoa1).setDataNascimento((LocalDate) any());
-        verify(pessoa1).setEnderecoPrincipal((Endereco) any());
-        verify(pessoa1).setEnderecos((Set<Endereco>) any());
-        verify(pessoa1).setId((Long) any());
-        verify(pessoa1).setNome((String) any());
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        when(enderecoService.buscar(anyLong())).thenReturn(endereco);
+        when(pessoaRepository.save(any(Pessoa.class))).thenReturn(pessoaComEndereco);
+
+        pessoaServiceImpl.adicionarEndereco(1L, 1L);
+
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService).buscar(anyLong());
+        verify(pessoaRepository).save(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#removerEndereco(Long, Long)}
-     */
     @Test
-    void testRemoverEndereco() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveLancarExcecaoAoRemoverEnderecoAPessoaComIdInexistente() {
+        when(pessoaRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-        when(enderecoService.buscar((Long) any())).thenReturn(endereco1);
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.removerEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(enderecoService).buscar((Long) any());
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(10L, 1L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Pessoa não encontrada com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService, never()).buscar(anyLong());
+        verify(pessoaRepository, never()).save(any(Pessoa.class));
     }
 
-    /**
-     * Method under test: {@link PessoaServiceImpl#removerEndereco(Long, Long)}
-     */
     @Test
-    void testRemoverEndereco2() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+    void deveLancarExcecaoAoRemoverEnderecoComIdInexistenteAPessoa() {
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(new HashSet<>());
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-        when(enderecoService.buscar((Long) any())).thenThrow(new UnsupportedOperationException());
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.removerEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(enderecoService).buscar((Long) any());
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        when(enderecoService.buscar(anyLong())).thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: 10"));
+
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(1L, 10L));
+        assertEquals(EntityNotFoundException.class, exception.getClass());
+        assertEquals("Endereço não encontrado com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService).buscar(anyLong());
+        verify(pessoaRepository, never()).save(any(Pessoa.class));
     }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#removerEndereco(Long, Long)}
-     */
-    @Test
-    void testRemoverEndereco3() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-
-        Endereco endereco1 = new Endereco();
-        endereco1.setCep("Cep");
-        endereco1.setCidade("Cidade");
-        endereco1.setId(123L);
-        endereco1.setLogradouro("Logradouro");
-        endereco1.setNumero("Numero");
-
-        HashSet<Endereco> enderecoSet = new HashSet<>();
-        enderecoSet.add(endereco1);
-
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(enderecoSet);
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-
-        Endereco endereco2 = new Endereco();
-        endereco2.setCep("Cep");
-        endereco2.setCidade("Cidade");
-        endereco2.setId(123L);
-        endereco2.setLogradouro("Logradouro");
-        endereco2.setNumero("Numero");
-        when(enderecoService.buscar((Long) any())).thenReturn(endereco2);
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.removerEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-        verify(enderecoService).buscar((Long) any());
-    }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#removerEndereco(Long, Long)}
-     */
-    @Test
-    void testRemoverEndereco4() {
-        when(pessoaRepository.findById((Long) any())).thenReturn(Optional.empty());
-
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
-        when(enderecoService.buscar((Long) any())).thenReturn(endereco);
-        assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.removerEndereco(1L, 1L));
-        verify(pessoaRepository).findById((Long) any());
-    }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#adicionarEnderecoPrincipal(Long, Long)}
-     */
     @Test
     void testAdicionarEnderecoPrincipal() {
         Endereco endereco = new Endereco();
@@ -663,5 +479,19 @@ class PessoaServiceImplTest {
         end3.setCidade("Quixeramobim");
 
         return Set.of(end1, end2, end3);
+    }
+
+    private Endereco getEndereco(){
+
+        return new Endereco(1L, "Rua A", "32644878", "33", "Fogareiro City");
+    }
+    private Endereco getEnderecoRequest(){
+        Endereco enderecoRequest = new Endereco();
+        enderecoRequest.setLogradouro("Rua A");
+        enderecoRequest.setCep("32644878");
+        enderecoRequest.setNumero("33");
+        enderecoRequest.setCidade("Fogareiro City");
+
+        return enderecoRequest;
     }
 }
