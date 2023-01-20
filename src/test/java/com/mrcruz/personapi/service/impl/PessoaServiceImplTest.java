@@ -189,20 +189,20 @@ class PessoaServiceImplTest {
         verify(enderecoService).buscar(anyLong());
         verify(pessoaRepository, never()).save(any(Pessoa.class));
     }
-    //--------------------------------
+
     @Test
-    void deveRemoverEnderecoAPessoa() {
+    void deveRemoverEnderecoDaPessoa() {
         Endereco endereco = getEndereco();
 
         Pessoa pessoaComEndereco = getPessoaComEndereco();
         Pessoa pessoa = getPessoa();
-        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoaComEndereco);
 
         when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
         when(enderecoService.buscar(anyLong())).thenReturn(endereco);
-        when(pessoaRepository.save(any(Pessoa.class))).thenReturn(pessoaComEndereco);
+        when(pessoaRepository.save(any(Pessoa.class))).thenReturn(pessoa);
 
-        pessoaServiceImpl.adicionarEndereco(1L, 1L);
+        pessoaServiceImpl.removerEndereco(1L, 1L);
 
         verify(pessoaRepository).findById(anyLong());
         verify(enderecoService).buscar(anyLong());
@@ -210,10 +210,10 @@ class PessoaServiceImplTest {
     }
 
     @Test
-    void deveLancarExcecaoAoRemoverEnderecoAPessoaComIdInexistente() {
+    void deveLancarExcecaoAoRemoverEnderecoDaPessoaComIdInexistente() {
         when(pessoaRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(10L, 1L));
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.removerEndereco(10L, 1L));
         assertEquals(EntityNotFoundException.class, exception.getClass());
         assertEquals("Pessoa não encontrada com ID: 10", exception.getMessage());
         verify(pessoaRepository).findById(anyLong());
@@ -222,16 +222,36 @@ class PessoaServiceImplTest {
     }
 
     @Test
-    void deveLancarExcecaoAoRemoverEnderecoComIdInexistenteAPessoa() {
-        Pessoa pessoa = getPessoa();
+    void deveLancarExcecaoAoRemoverEnderecoComIdInexistenteDaPessoa() {
+        Pessoa pessoa = getPessoaComEndereco();
         Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
         when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
         when(enderecoService.buscar(anyLong())).thenThrow(new EntityNotFoundException("Endereço não encontrado com ID: 10"));
 
-        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.adicionarEndereco(1L, 10L));
+        var exception = assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.removerEndereco(1L, 10L));
         assertEquals(EntityNotFoundException.class, exception.getClass());
         assertEquals("Endereço não encontrado com ID: 10", exception.getMessage());
+        verify(pessoaRepository).findById(anyLong());
+        verify(enderecoService).buscar(anyLong());
+        verify(pessoaRepository, never()).save(any(Pessoa.class));
+    }
+
+    @Test
+    void deveLancarExcecaoAoRemoverEnderecoQueNaoPertenceAPessoa() {
+        Endereco endereco = getEndereco();
+        endereco.setId(10L);
+
+        Pessoa pessoaComEndereco = getPessoaComEndereco();
+        Pessoa pessoa = getPessoa();
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoaComEndereco);
+
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        when(enderecoService.buscar(anyLong())).thenReturn(endereco);
+
+        var exception = assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.removerEndereco(1L, 10L));
+        assertEquals(UnsupportedOperationException.class, exception.getClass());
+        assertEquals("Pessoa com ID: 1 não possui endereço com ID: 10", exception.getMessage());
         verify(pessoaRepository).findById(anyLong());
         verify(enderecoService).buscar(anyLong());
         verify(pessoaRepository, never()).save(any(Pessoa.class));
@@ -413,17 +433,11 @@ class PessoaServiceImplTest {
         return pessoa;
     }
     private Pessoa getPessoaComEndereco(){
-        Endereco endereco = new Endereco();
-        endereco.setId(1L);
-        endereco.setLogradouro("Rua 25 de Março");
-        endereco.setCep("54512161");
-        endereco.setNumero("568");
-        endereco.setCidade("Quixeramobim");
-
+        Endereco endereco = getEndereco();
         Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 5));
         pessoa.setId(1L);
         pessoa.setEnderecoPrincipal(endereco);
-        pessoa.setEnderecos(Set.of(endereco));
+        pessoa.setEnderecos(new HashSet<>(Set.of(endereco)));
         return pessoa;
     }
 
