@@ -1,16 +1,8 @@
 package com.mrcruz.personapi.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
@@ -31,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
@@ -79,11 +72,28 @@ class PessoaServiceImplTest {
     }
 
     @Test
-    void testListar() {
-        when(pessoaRepository.findByNomeContainingIgnoreCase((String) any(), (Pageable) any()))
-                .thenReturn(new PageImpl<>(new ArrayList<>()));
-        assertTrue(pessoaServiceImpl.listar("Nome", null).toList().isEmpty());
-        verify(pessoaRepository).findByNomeContainingIgnoreCase((String) any(), (Pageable) any());
+    void deveListarPessoa() {
+        Page<Pessoa> pageResponse = new PageImpl<>(getPessoas());
+
+        when(pessoaRepository.findAll(Pageable.ofSize(20))).thenReturn(pageResponse);
+        Page<PessoaDTO> result = pessoaServiceImpl.listar(null, Pageable.ofSize(20));
+        assertFalse(result.toList().isEmpty());
+        assertEquals(4, result.getContent().size());
+        verify(pessoaRepository).findAll(any(Pageable.class));
+        verify(pessoaRepository, never()).findByNomeContainingIgnoreCase(any(),any(Pageable.class));
+    }
+
+    @Test
+    void deveListarPessoaComFiltro() {
+        String filtro = "Ana";
+        Page<Pessoa> pageResponse = new PageImpl<>(getPessoasComFiltro(filtro));
+
+        when(pessoaRepository.findByNomeContainingIgnoreCase(filtro, Pageable.ofSize(20))).thenReturn(pageResponse);
+        Page<PessoaDTO> result = pessoaServiceImpl.listar(filtro, Pageable.ofSize(20));
+        assertFalse(result.toList().isEmpty());
+        assertEquals(2, result.getContent().size());
+        verify(pessoaRepository).findByNomeContainingIgnoreCase(anyString(), any(Pageable.class));
+        verify(pessoaRepository, never()).findAll(any(Pageable.class));
     }
 
     @Test
@@ -951,6 +961,23 @@ class PessoaServiceImplTest {
         PessoaDTO p4 = new  PessoaDTO(3L, "Maria Ana", LocalDate.of(2002, 3, 15), null);
 
         return Arrays.asList(p1, p2, p3, p4);
+    }
+
+    private List<Pessoa> getPessoas(){
+        Pessoa p1 = new  Pessoa("Bob Jhon", LocalDate.of(1995, 10, 5));
+        p1.setId(1L);
+        Pessoa p2 = new  Pessoa("Ana Kelly", LocalDate.of(2000, 5, 10));
+        p2.setId(2L);
+        Pessoa p3 = new  Pessoa("Jacob Fernandes", LocalDate.of(1985, 11, 20));
+        p3.setId(3L);
+        Pessoa p4 = new  Pessoa("Maria Ana", LocalDate.of(2002, 3, 15));
+        p4.setId(4L);
+
+        return Arrays.asList(p1, p2, p3, p4);
+    }
+
+    private List<Pessoa> getPessoasComFiltro(String filtro){
+        return getPessoas().stream().filter(pessoa -> pessoa.getNome().contains(filtro)).collect(Collectors.toList());
     }
 
     private List<PessoaDTO> getPessoasDTOComFiltro(String filtro){
