@@ -8,8 +8,8 @@
 ![Bitbucket open issues](https://img.shields.io/bitbucket/issues/ewdemy/README-template?style=for-the-badge)
 ![Bitbucket open pull requests](https://img.shields.io/bitbucket/pr-raw/ewdemy/README-template?style=for-the-badge)
 
-<img src="./imgs/Screenshot (20).png" alt="exemplo imagem">
-<img src="./imgs/Screenshot (21).png" alt="exemplo imagem">
+<img src="./img/Screenshot (20).png" alt="exemplo imagem">
+<img src="./img/Screenshot (21).png" alt="exemplo imagem">
 
 > API para gerenciamento de pessoas e endereços.
 
