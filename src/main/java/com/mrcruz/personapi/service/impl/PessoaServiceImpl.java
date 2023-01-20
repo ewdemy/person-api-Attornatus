@@ -4,7 +4,6 @@ import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.model.PessoaRequest;
-import com.mrcruz.personapi.repository.EnderecoRepository;
 import com.mrcruz.personapi.repository.PessoaRepository;
 import com.mrcruz.personapi.service.EnderecoService;
 import com.mrcruz.personapi.service.PessoaService;
@@ -23,7 +22,6 @@ public class PessoaServiceImpl implements PessoaService {
 
     private PessoaRepository pessoaRepository;
     private EnderecoService enderecoService;
-    private final EnderecoRepository enderecoRepository;
 
     @Override
     public Pessoa salvar(PessoaRequest pessoa) {

@@ -351,12 +351,12 @@ class PessoaControllerTest {
 
 
     private PessoaRequest getPessoaRequest(){
-        return new PessoaRequest("Bob Jhon", LocalDate.of(1995, 10, 05));
+        return new PessoaRequest("Bob Jhon", LocalDate.of(1995, 10, 5));
     }
 
     private Pessoa getPessoa(){
 
-        Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 05));
+        Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 5));
         pessoa.setId(1L);
         return pessoa;
     }
@@ -368,17 +368,15 @@ class PessoaControllerTest {
         endereco.setNumero("568");
         endereco.setCidade("Quixeramobim");
 
-        Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 05));
+        Pessoa pessoa = new Pessoa("Bob Jhon", LocalDate.of(1995, 10, 5));
         pessoa.setId(1L);
         pessoa.setEnderecoPrincipal(endereco);
         pessoa.setEnderecos(Set.of(endereco));
         return pessoa;
     }
-    private Endereco getEndereco(){
-        return new Endereco(1L, "Rua A", "32644878", "33", "Fogareiro City");
-    }
+
     private List<PessoaDTO> getPessoasDTO(){
-        PessoaDTO p1 = new  PessoaDTO(1L, "Bob Jhon", LocalDate.of(1995, 10, 05), null);
+        PessoaDTO p1 = new  PessoaDTO(1L, "Bob Jhon", LocalDate.of(1995, 10, 5), null);
         PessoaDTO p2 = new  PessoaDTO(2L, "Ana Kelly", LocalDate.of(2000, 5, 10), null);
         PessoaDTO p3 = new  PessoaDTO(3L, "Jacob Fernandes", LocalDate.of(1985, 11, 20), null);
         PessoaDTO p4 = new  PessoaDTO(3L, "Maria Ana", LocalDate.of(2002, 3, 15), null);
