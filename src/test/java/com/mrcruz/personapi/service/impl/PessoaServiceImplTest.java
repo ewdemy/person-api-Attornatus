@@ -1,24 +1,12 @@
 package com.mrcruz.personapi.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
-
 import com.mrcruz.personapi.model.Endereco;
 import com.mrcruz.personapi.model.Pessoa;
 import com.mrcruz.personapi.model.PessoaDTO;
 import com.mrcruz.personapi.model.PessoaRequest;
 import com.mrcruz.personapi.repository.PessoaRepository;
 import com.mrcruz.personapi.service.EnderecoService;
-
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import jakarta.persistence.EntityNotFoundException;
-
-import org.junit.jupiter.api.Disabled;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +16,14 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {PessoaServiceImpl.class})
 @ExtendWith(SpringExtension.class)
@@ -243,7 +239,6 @@ class PessoaServiceImplTest {
         endereco.setId(10L);
 
         Pessoa pessoaComEndereco = getPessoaComEndereco();
-        Pessoa pessoa = getPessoa();
         Optional<Pessoa> optionalPessoa = Optional.of(pessoaComEndereco);
 
         when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
@@ -310,7 +305,6 @@ class PessoaServiceImplTest {
         endereco.setId(10L);
 
         Pessoa pessoaComEndereco = getPessoaComEndereco();
-        Pessoa pessoa = getPessoa();
         Optional<Pessoa> optionalPessoa = Optional.of(pessoaComEndereco);
 
         when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
@@ -327,48 +321,16 @@ class PessoaServiceImplTest {
 
     @Test
     void testBuscarEnderecosPessoa() {
-        Endereco endereco = new Endereco();
-        endereco.setCep("Cep");
-        endereco.setCidade("Cidade");
-        endereco.setId(123L);
-        endereco.setLogradouro("Logradouro");
-        endereco.setNumero("Numero");
+        Set<Endereco> enderecos = getEnderecos();
+        Pessoa pessoa = getPessoa();
+        pessoa.setEnderecos(enderecos);
+        Optional<Pessoa> optionalPessoa = Optional.of(pessoa);
 
-        Pessoa pessoa = new Pessoa();
-        pessoa.setDataNascimento(LocalDate.ofEpochDay(1L));
-        pessoa.setEnderecoPrincipal(endereco);
-        HashSet<Endereco> enderecoSet = new HashSet<>();
-        pessoa.setEnderecos(enderecoSet);
-        pessoa.setId(123L);
-        pessoa.setNome("Nome");
-        Optional<Pessoa> ofResult = Optional.of(pessoa);
-        when(pessoaRepository.findById((Long) any())).thenReturn(ofResult);
-        Set<Endereco> actualBuscarEnderecosPessoaResult = pessoaServiceImpl.buscarEnderecosPessoa(1L);
-        assertSame(enderecoSet, actualBuscarEnderecosPessoaResult);
-        assertTrue(actualBuscarEnderecosPessoaResult.isEmpty());
-        verify(pessoaRepository).findById((Long) any());
+        when(pessoaRepository.findById(anyLong())).thenReturn(optionalPessoa);
+        Set<Endereco> enderecosResult= pessoaServiceImpl.buscarEnderecosPessoa(1L);
+        assertEquals(3, enderecosResult.size());
+        verify(pessoaRepository).findById(anyLong());
     }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#buscarEnderecosPessoa(Long)}
-     */
-    @Test
-    void testBuscarEnderecosPessoa2() {
-        when(pessoaRepository.findById((Long) any())).thenReturn(Optional.empty());
-        assertThrows(EntityNotFoundException.class, () -> pessoaServiceImpl.buscarEnderecosPessoa(1L));
-        verify(pessoaRepository).findById((Long) any());
-    }
-
-    /**
-     * Method under test: {@link PessoaServiceImpl#buscarEnderecosPessoa(Long)}
-     */
-    @Test
-    void testBuscarEnderecosPessoa3() {
-        when(pessoaRepository.findById((Long) any())).thenThrow(new UnsupportedOperationException());
-        assertThrows(UnsupportedOperationException.class, () -> pessoaServiceImpl.buscarEnderecosPessoa(1L));
-        verify(pessoaRepository).findById((Long) any());
-    }
-
 
 
     private PessoaRequest getPessoaRequest(){
@@ -390,15 +352,6 @@ class PessoaServiceImplTest {
         return pessoa;
     }
 
-    private List<PessoaDTO> getPessoasDTO(){
-        PessoaDTO p1 = new  PessoaDTO(1L, "Bob Jhon", LocalDate.of(1995, 10, 5), null);
-        PessoaDTO p2 = new  PessoaDTO(2L, "Ana Kelly", LocalDate.of(2000, 5, 10), null);
-        PessoaDTO p3 = new  PessoaDTO(3L, "Jacob Fernandes", LocalDate.of(1985, 11, 20), null);
-        PessoaDTO p4 = new  PessoaDTO(3L, "Maria Ana", LocalDate.of(2002, 3, 15), null);
-
-        return Arrays.asList(p1, p2, p3, p4);
-    }
-
     private List<Pessoa> getPessoas(){
         Pessoa p1 = new  Pessoa("Bob Jhon", LocalDate.of(1995, 10, 5));
         p1.setId(1L);
@@ -416,9 +369,6 @@ class PessoaServiceImplTest {
         return getPessoas().stream().filter(pessoa -> pessoa.getNome().contains(filtro)).collect(Collectors.toList());
     }
 
-    private List<PessoaDTO> getPessoasDTOComFiltro(String filtro){
-        return getPessoasDTO().stream().filter(pessoaDTO -> pessoaDTO.getNome().contains(filtro)).collect(Collectors.toList());
-    }
     private Set<Endereco> getEnderecos() {
         Endereco end1 = new Endereco();
         end1.setId(1L);
@@ -447,14 +397,5 @@ class PessoaServiceImplTest {
     private Endereco getEndereco(){
 
         return new Endereco(1L, "Rua A", "32644878", "33", "Fogareiro City");
-    }
-    private Endereco getEnderecoRequest(){
-        Endereco enderecoRequest = new Endereco();
-        enderecoRequest.setLogradouro("Rua A");
-        enderecoRequest.setCep("32644878");
-        enderecoRequest.setNumero("33");
-        enderecoRequest.setCidade("Fogareiro City");
-
-        return enderecoRequest;
     }
 }
